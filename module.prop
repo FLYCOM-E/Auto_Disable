@@ -1,0 +1,7 @@
+id=auto_disable
+name=自动冻结
+version=V1.0
+versionCode=1
+author=By FlyCome
+description=【定制】自动检测指定软件前台状态，如运行则冻结指定软件
+#updateJson=
