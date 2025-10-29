@@ -1,1 +1,0 @@
-*/30 * * * * ps -A | grep AutoDisableServer || nohup setsid /data/user/0/com.termux/files/home/Auto_Disable/AutoDisableServer >>/dev/null &
