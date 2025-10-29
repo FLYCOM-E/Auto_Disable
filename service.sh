@@ -21,19 +21,15 @@ elif [ -d "/data/adb/ksu" ]; then
     bin_dir="/data/adb/ksu/bin"
 fi
 ######
-DisableApp=$(grep ^'冻结=' "$home_dir/config.prop" | cut -f2 -d '=')
-CheckApp=$(grep ^'检测=' "$home_dir/config.prop" | cut -f2 -d '=')
-if [ -n "$DisableApp" ]; then
-    if [ -n "$CheckApp" ]; then
-        killall AutoDisableServer 2>/dev/null; nohup setsid AutoDisableServer >>/dev/null &
-        echo -n "*/30 * * * * killall AutoDisableServer 2>/dev/null; nohup setsid AutoDisableServer >>/dev/null &" > "$home_dir/CRON/root"
-        "$bin_dir/busybox" crond -c "$home_dir/CRON" &
-        echo "Server is Run" > "$home_dir/LOG.log"
-    else
-        echo "Error: “检测=” 为空" > "$home_dir/LOG.log"
-    fi
-else
-    echo "Error: “冻结=” 为空" > "$home_dir/LOG.log"
+if [ -z "$(cat CheckList.conf)" ]; then
+    echo " » CheckList.conf 为空！" > "$home_dir/LOG.log"
+    exit 1
+elif [ -z "$(cat DisableList.conf)" ]; then
+    echo " » DisableList.conf 为空！" > "$home_dir/LOG.log"
+    exit 1
 fi
-
-exit 0
+######
+echo -n "*/30 * * * * ps -A | grep AutoDisableServer || nohup setsid $home_dir/AutoDisableServer >>/dev/null &" > "$home_dir/CRON/root"
+"$bin_dir/busybox" crond -c "$home_dir/CRON" &
+ps -A | grep AutoDisableServer || nohup setsid "$home_dir/AutoDisableServer" >>/dev/null &
+echo "Server is Run" > "$home_dir/LOG.log"
