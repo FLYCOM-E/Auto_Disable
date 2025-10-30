@@ -101,7 +101,7 @@ int main()
                     disablePackage[strcspn(disablePackage, "\n")] = 0;
                     
                     char command[128] = "";
-                    snprintf(command, sizeof(command), "pm disable %s >>/dev/null 2>&1", disablePackage);
+                    snprintf(command, sizeof(command), "pm disable-user %s >>/dev/null 2>&1", disablePackage);
                     
                     int i = system(command);
                     if (i == 0)
