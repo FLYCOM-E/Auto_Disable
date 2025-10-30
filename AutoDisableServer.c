@@ -7,7 +7,7 @@ int main()
 {
     //检查当前用户权限
     uid_t nowuid = getuid();
-    if (nowuid != 0 && nowuid != 1000)
+    if (nowuid != 0 && nowuid != 2000)
     {
         printf(" » Please Use Root or Shell Run\n");
         return 0;
