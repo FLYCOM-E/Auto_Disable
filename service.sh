@@ -29,7 +29,16 @@ elif [ -z "$(cat DisableList.conf)" ]; then
     exit 1
 fi
 ######
-echo -n "*/30 * * * * ps -A | grep AutoDisableServer || nohup setsid $home_dir/AutoDisableServer >>/dev/null &" > "$home_dir/CRON/root"
-"$bin_dir/busybox" crond -c "$home_dir/CRON" &
-ps -A | grep AutoDisableServer || nohup setsid "$home_dir/AutoDisableServer" >>/dev/null &
-echo "Server is Run" > "$home_dir/LOG.log"
+chmod +x "$home_dir/AutoDisableServer"
+######
+if ! ps -A | grep "S AutoDisableServer"; then
+    nohup setsid "$home_dir/AutoDisableServer" >>/dev/null &
+    if ps -A | grep "S AutoDisableServer"; then
+        echo "AutoDisableServer is Run" > "$home_dir/LOG.log"
+        echo -n "*/30 * * * * ps -A | grep AutoDisableServer || nohup setsid $home_dir/AutoDisableServer >>/dev/null &" > "$home_dir/CRON/root"
+        "$bin_dir/busybox" crond -c "$home_dir/CRON" &
+    else
+        echo "AutoDisableServer Run Error" > "$home_dir/LOG.log"
+    fi
+fi
+
