@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-int main()
+int main(int COMI, char * COM[])
 {
     //检查当前用户权限
     uid_t nowuid = getuid();
@@ -11,6 +11,40 @@ int main()
     {
         printf(" » Please Use Root or Shell Run\n");
         return 0;
+    }
+    
+    if (COMI < 2)
+    {
+        printf(" » 未传入配置路径！\n");
+        return 1;
+    }
+    else
+    {
+        if (access(COM[1], F_OK) != 0)
+        {
+            printf(" » 配置路径不可访问或不存在！\n");
+            return 1;
+        }
+    }
+    
+    char checkListFile[24] = "CheckList.conf";
+    char disableListFile[24] = "DisableList.conf";
+    
+    char CHECKLIST_FILE[strlen(COM[1]) + 24];
+    char DISABLELIST_FILE[strlen(COM[1]) + 24];
+    
+    snprintf(CHECKLIST_FILE, sizeof(CHECKLIST_FILE), "%s/%s", COM[1], checkListFile);
+    snprintf(DISABLELIST_FILE, sizeof(DISABLELIST_FILE), "%s/%s", COM[1], disableListFile);
+    
+    if (access(CHECKLIST_FILE, F_OK) != 0)
+    {
+        printf(" » CheckList.conf 配置不存在/名称错误！\n");
+        return 1;
+    }
+    else if (access(DISABLELIST_FILE, F_OK) != 0)
+    {
+        printf(" » DisableList.conf 配置不存在/名称错误！\n");
+        return 1;
     }
     
     //定义循环所需变量
@@ -62,7 +96,7 @@ int main()
         
         //读取检测列表并检测当前前台是否为被监测App
         char var[64] = "";
-        FILE * checkList = fopen("CheckList.conf", "r");
+        FILE * checkList = fopen(CHECKLIST_FILE, "r");
         if (checkList)
         {
             while (fgets(var, sizeof(var), checkList))
@@ -72,12 +106,11 @@ int main()
                 if (strcmp(var, TopApp) == 0)
                 {
                     /*
-                    如果当前前台是被监测App则置1并保留此包名以检测变化
-                    这里不会影响前面置2的行为，因为如果前台仍然是被监测App
-                    就没必要解冻App列表
+                    如果当前前台是被监测 App 则置 mode=1 并保留包名以检测变化
+                    这里不会影响前面置2的行为，因为如果前台仍然是被监测App就没必要解冻App列表
                     */
                     mode = 1;
-                    strcpy(oldTopApp, var);
+                    snprintf(oldTopApp, sizeof(oldTopApp), "%s", var);
                     break;
                 }
             }
@@ -86,14 +119,14 @@ int main()
         }
         else
         {
-            printf(" » CheckList.conf Read Err\n");
+            printf(" » CheckList Read Err\n");
             return 1;
         }
         
         if (mode == 1) //为1则读取冻结App列表并逐一冻结
         {
             char disablePackage[64] = "";
-            FILE * disableList = fopen("DisableList.conf", "r");
+            FILE * disableList = fopen(DISABLELIST_FILE, "r");
             if (disableList)
             {
                 while (fgets(disablePackage, sizeof(disablePackage), disableList))
@@ -118,14 +151,14 @@ int main()
             }
             else
             {
-                printf(" » DisableList.conf Read Err\n");
+                printf(" » DisableList Read Err\n");
                 return 1;
             }
         }
         else if (mode == 2) //为2则读取冻结App列表并逐一解冻
         {
             char disablePackage[64] = "";
-            FILE * disableList = fopen("DisableList.conf", "r");
+            FILE * disableList = fopen(DISABLELIST_FILE, "r");
             if (disableList)
             {
                 while (fgets(disablePackage, sizeof(disablePackage), disableList))
@@ -150,7 +183,7 @@ int main()
             }
             else
             {
-                printf(" » DisableList.conf Read Err\n");
+                printf(" » DisableList Read Err\n");
                 return 1;
             }
             

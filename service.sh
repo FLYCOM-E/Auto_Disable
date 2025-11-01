@@ -32,10 +32,10 @@ fi
 chmod +x "$home_dir/AutoDisableServer"
 ######
 if ! ps -A | grep "S AutoDisableServer"; then
-    nohup setsid "$home_dir/AutoDisableServer" >>/dev/null &
+    nohup setsid "$home_dir/AutoDisableServer $home_dir" >>/dev/null &
     if ps -A | grep "S AutoDisableServer"; then
         echo "AutoDisableServer is Run" > "$home_dir/LOG.log"
-        echo -n "*/30 * * * * ps -A | grep AutoDisableServer || nohup setsid $home_dir/AutoDisableServer >>/dev/null &" > "$home_dir/CRON/root"
+        echo -n "*/30 * * * * ps -A | grep AutoDisableServer || nohup setsid $home_dir/AutoDisableServer $home_dir >>/dev/null &" > "$home_dir/CRON/root"
         "$bin_dir/busybox" crond -c "$home_dir/CRON" &
     else
         echo "AutoDisableServer Run Error" > "$home_dir/LOG.log"
