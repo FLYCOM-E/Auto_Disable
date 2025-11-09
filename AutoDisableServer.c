@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+#define WAITTIME 10
+
 int main(int COMI, char * COM[])
 {
     //检查当前用户权限
@@ -59,21 +61,21 @@ int main(int COMI, char * COM[])
         FILE * TopApp_fp = popen("dumpsys window | grep mCurrentFocus | head -n 1 | cut -f 1 -d '/' | cut -f 5 -d ' ' | cut -f 1 -d ' '", "r");
         if (TopApp_fp == NULL)
         {
-            printf(" » Get TopApp Err\n");
-            sleep(10);
+            printf(" » Get TopApp Err. Continue\n");
             continue;
         }
         fgets(TopApp, sizeof(TopApp), TopApp_fp);
         TopApp[strcspn(TopApp, "\n")] = 0;
         pclose(TopApp_fp);
         
-        //这里检查屏幕状态
-        if (strstr(TopApp, "NotificationShade") ||
+        //检查屏幕状态
+        if (strcmp(TopApp, "") == 0 ||
+           strstr(TopApp, "NotificationShade") ||
            strstr(TopApp, "StatusBar") ||
            strstr(TopApp, "ActionsDialog"))
         {
             printf(" » Top is SystemUI. Wait\n");
-            sleep(10);
+            sleep(WAITTIME);
             continue;
         }
         
@@ -84,7 +86,7 @@ int main(int COMI, char * COM[])
             if (strcmp(TopApp, oldTopApp) == 0)
             {
                 printf(" » App Not Cycle. Wait\n");
-                sleep(10);
+                sleep(WAITTIME);
                 continue;
             }
             else
@@ -136,8 +138,7 @@ int main(int COMI, char * COM[])
                     char command[128] = "";
                     snprintf(command, sizeof(command), "pm disable-user %s >>/dev/null 2>&1", disablePackage);
                     
-                    int i = system(command);
-                    if (i == 0)
+                    if (system(command) == 0)
                     {
                         printf(" » Disable: %s\n", disablePackage);
                     }
@@ -168,8 +169,7 @@ int main(int COMI, char * COM[])
                     char command[128] = "";
                     snprintf(command, sizeof(command), "pm enable %s >>/dev/null 2>&1", disablePackage);
                     
-                    int i = system(command);
-                    if (i == 0)
+                    if (system(command) == 0)
                     {
                         printf(" » Enable: %s\n", disablePackage);
                     }
@@ -192,7 +192,7 @@ int main(int COMI, char * COM[])
         }
         
         printf(" » Cycle Wait\n");
-        sleep(10);
+        sleep(WAITTIME);
         
     }
     
