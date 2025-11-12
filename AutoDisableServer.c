@@ -2,8 +2,12 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/wait.h>
 
 #define WAITTIME 10
+#define MAX_PACKAGE 128
+#define CHECKLIST "CheckList.conf"
+#define DISABLELIST "DisableList.conf"
 
 int main(int COMI, char * COM[])
 {
@@ -14,29 +18,22 @@ int main(int COMI, char * COM[])
         printf(" » Please Use Root or Shell Run\n");
         return 0;
     }
-    
     if (COMI < 2)
     {
         printf(" » 未传入配置路径！\n");
         return 1;
     }
-    else
+    else if (access(COM[1], F_OK) != 0)
     {
-        if (access(COM[1], F_OK) != 0)
-        {
-            printf(" » 配置路径不可访问或不存在！\n");
-            return 1;
-        }
+        printf(" » 配置路径不可访问或不存在！\n");
+        return 1;
     }
-    
-    char checkListFile[24] = "CheckList.conf";
-    char disableListFile[24] = "DisableList.conf";
     
     char CHECKLIST_FILE[strlen(COM[1]) + 24];
     char DISABLELIST_FILE[strlen(COM[1]) + 24];
     
-    snprintf(CHECKLIST_FILE, sizeof(CHECKLIST_FILE), "%s/%s", COM[1], checkListFile);
-    snprintf(DISABLELIST_FILE, sizeof(DISABLELIST_FILE), "%s/%s", COM[1], disableListFile);
+    snprintf(CHECKLIST_FILE, sizeof(CHECKLIST_FILE), "%s/%s", COM[1], CHECKLIST);
+    snprintf(DISABLELIST_FILE, sizeof(DISABLELIST_FILE), "%s/%s", COM[1], DISABLELIST);
     
     if (access(CHECKLIST_FILE, F_OK) != 0)
     {
@@ -51,22 +48,23 @@ int main(int COMI, char * COM[])
     
     //定义循环所需变量
     int mode = 0;
-    char oldTopApp[64] = "";
+    char oldTopApp[MAX_PACKAGE] = "";
     
     //Start the cycle
     for ( ; ; )
     {
         //Get获取当前前台
-        char TopApp[64] = "";
+        char TopApp[MAX_PACKAGE] = "";
         FILE * TopApp_fp = popen("dumpsys window | grep mCurrentFocus | head -n 1 | cut -f 1 -d '/' | cut -f 5 -d ' ' | cut -f 1 -d ' '", "r");
         if (TopApp_fp == NULL)
         {
             printf(" » Get TopApp Err. Continue\n");
+            sleep(1);
             continue;
         }
         fgets(TopApp, sizeof(TopApp), TopApp_fp);
-        TopApp[strcspn(TopApp, "\n")] = 0;
         pclose(TopApp_fp);
+        TopApp[strcspn(TopApp, "\n")] = 0;
         
         //检查屏幕状态
         if (strcmp(TopApp, "") == 0 ||
@@ -97,7 +95,7 @@ int main(int COMI, char * COM[])
         }
         
         //读取检测列表并检测当前前台是否为被监测App
-        char var[64] = "";
+        char var[MAX_PACKAGE] = "";
         FILE * checkList = fopen(CHECKLIST_FILE, "r");
         if (checkList)
         {
@@ -116,7 +114,6 @@ int main(int COMI, char * COM[])
                     break;
                 }
             }
-            
             fclose(checkList);
         }
         else
@@ -127,7 +124,7 @@ int main(int COMI, char * COM[])
         
         if (mode == 1) //为1则读取冻结App列表并逐一冻结
         {
-            char disablePackage[64] = "";
+            char disablePackage[MAX_PACKAGE] = "";
             FILE * disableList = fopen(DISABLELIST_FILE, "r");
             if (disableList)
             {
@@ -135,19 +132,35 @@ int main(int COMI, char * COM[])
                 {
                     disablePackage[strcspn(disablePackage, "\n")] = 0;
                     
-                    char command[128] = "";
-                    snprintf(command, sizeof(command), "pm disable-user %s >>/dev/null 2>&1", disablePackage);
-                    
-                    if (system(command) == 0)
+                    pid_t newPid = fork();
+                    if (newPid == -1)
                     {
-                        printf(" » Disable: %s\n", disablePackage);
+                        printf(" » DisableService Fork Error!\n");
+                        continue;
+                    }
+                    if (newPid == 0)
+                    {
+                        execlp("pm", "pm", "disable-user", disablePackage, NULL);
+                        _exit(1);
                     }
                     else
                     {
-                        printf(" » Disable: %s Err\n", disablePackage);
+                        int end = 0;
+                        if (waitpid(newPid, &end, 0) == -1)
+                        {
+                            printf("Wait DisableService Error!\n");
+                            continue;
+                        }
+                        if (WIFEXITED(end) && WEXITSTATUS(end) == 0)
+                        {
+                            printf(" » Disable: %s\n", disablePackage);
+                        }
+                        else
+                        {
+                            printf(" » Disable: %s Err\n", disablePackage);
+                        }
                     }
                 }
-                
                 fclose(disableList);
             }
             else
@@ -158,7 +171,7 @@ int main(int COMI, char * COM[])
         }
         else if (mode == 2) //为2则读取冻结App列表并逐一解冻
         {
-            char disablePackage[64] = "";
+            char disablePackage[MAX_PACKAGE] = "";
             FILE * disableList = fopen(DISABLELIST_FILE, "r");
             if (disableList)
             {
@@ -166,19 +179,35 @@ int main(int COMI, char * COM[])
                 {
                     disablePackage[strcspn(disablePackage, "\n")] = 0;
                     
-                    char command[128] = "";
-                    snprintf(command, sizeof(command), "pm enable %s >>/dev/null 2>&1", disablePackage);
-                    
-                    if (system(command) == 0)
+                    pid_t newPid = fork();
+                    if (newPid == -1)
                     {
-                        printf(" » Enable: %s\n", disablePackage);
+                        printf(" » EnableService Fork Error!\n");
+                        continue;
+                    }
+                    if (newPid == 0)
+                    {
+                        execlp("pm", "pm", "enable", disablePackage, NULL);
+                        _exit(1);
                     }
                     else
                     {
-                        printf(" » Enable: %s Err\n", disablePackage);
+                        int end = 0;
+                        if (waitpid(newPid, &end, 0) == -1)
+                        {
+                            printf("Wait EnableService Error!\n");
+                            continue;
+                        }
+                        if (WIFEXITED(end) && WEXITSTATUS(end) == 0)
+                        {
+                            printf(" » Enable: %s\n", disablePackage);
+                        }
+                        else
+                        {
+                            printf(" » Enable: %s Err\n", disablePackage);
+                        }
                     }
                 }
-                
                 fclose(disableList);
             }
             else
@@ -186,14 +215,12 @@ int main(int COMI, char * COM[])
                 printf(" » DisableList Read Err\n");
                 return 1;
             }
-            
             //解冻后重置此值
             mode = 0;
         }
         
         printf(" » Cycle Wait\n");
         sleep(WAITTIME);
-        
     }
     
     return 0;
