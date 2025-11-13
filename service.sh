@@ -17,13 +17,8 @@ elif [ -d "/data/adb/ap" ]; then
     bin_dir="/data/adb/ap/bin"
 elif [ -d "/data/adb/ksu" ]; then
     bin_dir="/data/adb/ksu/bin"
-fi
-######
-if [ -z "$(cat CheckList.conf)" ]; then
-    echo " » CheckList.conf 为空！" > "$home_dir/LOG.log"
-    exit 1
-elif [ -z "$(cat DisableList.conf)" ]; then
-    echo " » DisableList.conf 为空！" > "$home_dir/LOG.log"
+else
+    echo "Check Bin Directory Error" > "$home_dir/LOG.log"
     exit 1
 fi
 ######
