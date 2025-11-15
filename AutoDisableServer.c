@@ -31,6 +31,8 @@ int main(int COMI, char * COM[])
     
     char CHECKLIST_FILE[strlen(COM[1]) + 24];
     char DISABLELIST_FILE[strlen(COM[1]) + 24];
+    CHECKLIST_FILE[0] = '\0';
+    DISABLELIST_FILE[0] = '\0';
     
     snprintf(CHECKLIST_FILE, sizeof(CHECKLIST_FILE), "%s/%s", COM[1], CHECKLIST);
     snprintf(DISABLELIST_FILE, sizeof(DISABLELIST_FILE), "%s/%s", COM[1], DISABLELIST);
