@@ -25,10 +25,10 @@ fi
 chmod +x "$home_dir/AutoDisableServer"
 ######
 if ! pgrep -f "AutoDisableServer"; then
-    nohup setsid "$home_dir/AutoDisableServer" "$home_dir" >>/dev/null 2>&1 &
+    "$home_dir/AutoDisableServer" "$home_dir"
     if pgrep -f "AutoDisableServer"; then
         echo "AutoDisableServer is Run" > "$home_dir/LOG.log"
-        echo -n "*/30 * * * * pgrep -f \"AutoDisableServer\" || nohup setsid \"$home_dir/AutoDisableServer\" \"$home_dir\" >>/dev/null 2>&1" > "$home_dir/CRON/root"
+        echo -n "*/30 * * * * pgrep -f \"AutoDisableServer\" || \"$home_dir/AutoDisableServer\" \"$home_dir\"" > "$home_dir/CRON/root"
         "$bin_dir/busybox" crond -c "$home_dir/CRON" &
     else
         echo "AutoDisableServer Run Error" > "$home_dir/LOG.log"

@@ -22,7 +22,7 @@
 
 
 
-模块核心 **`AutoDisableServer`** 实际支持以 **Shell** 权限运行，将 **`AutoDisableServer`** 复制进 **`/data/local/tmp`** 使用 **`nohup setsid /data/local/tmp/AutoDisableServer <配置文件所在路径> >/dev/null 2>&1`** 命令即可正常启动 **Server** 。暂未考虑做方便实现
+模块核心 **`AutoDisableServer`** 实际支持以 **Shell** 权限运行，将 **`AutoDisableServer`** 复制进 **`/data/local/tmp`** 使用 **`/data/local/tmp/AutoDisableServer <配置文件所在路径>`** 命令即可正常启动 **Server** 。暂未考虑做方便实现
 
 
 
