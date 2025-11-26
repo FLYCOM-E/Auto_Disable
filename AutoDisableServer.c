@@ -3,6 +3,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/wait.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #define DEBUG 0
 #define WAITTIME 10
@@ -39,12 +42,12 @@ int main(int COMI, char * COM[])
     
     if (access(checklist_file, F_OK) != 0)
     {
-        printf(" » CheckList.conf 配置不存在/名称错误！\n");
+        printf(" » %s 配置不存在/名称错误！\n", CHECKLIST);
         return 1;
     }
     else if (access(disablelist_file, F_OK) != 0)
     {
-        printf(" » DisableList.conf 配置不存在/名称错误！\n");
+        printf(" » %s 配置不存在/名称错误！\n", DISABLELIST);
         return 1;
     }
     
@@ -155,7 +158,7 @@ int main(int COMI, char * COM[])
         }
         else
         {
-            printf(" » CheckList Read Err\n");
+            printf(" » %s Read Err\n", CHECKLIST);
             break;
         }
         
@@ -249,7 +252,7 @@ int main(int COMI, char * COM[])
             }
             else
             {
-                printf(" » DisableList Read Err\n");
+                printf(" » %s Read Err\n", DISABLELIST);
                 return 1;
             }
             //解冻后重置此值
