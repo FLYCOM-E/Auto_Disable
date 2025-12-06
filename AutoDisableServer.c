@@ -9,7 +9,7 @@
 
 #define DEBUG 0
 #define WAITTIME 10
-#define MAX_PACKAGE 128
+#define MAX_PACKAGE 255
 #define CHECKLIST "CheckList.conf"
 #define DISABLELIST "DisableList.conf"
 #define GET_TOPAPP "dumpsys window | grep mCurrentFocus | head -n 1 | cut -f 1 -d '/' | cut -f 5 -d ' ' | cut -f 1 -d ' '"
