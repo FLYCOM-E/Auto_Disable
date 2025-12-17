@@ -1,7 +1,7 @@
 id=auto_disable
 name=自动冻结
-version=V2.3
-versionCode=6
+version=V3.0
+versionCode=7
 author=FlyCome
 description=自动检测指定软件前台状态，如运行则冻结冻结列表
 #updateJson=
