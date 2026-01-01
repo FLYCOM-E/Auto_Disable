@@ -14,7 +14,7 @@
 #define LOGPRINT __android_log_print
 #define MAX_PATH 4096
 #define MAX_PACKAGE 256
-#define MAX_CONFIG 10
+#define MAX_CONFIG 30
 #define WAITTIME 10
 
 static int service(int mode, char * config_dir, char * package);
